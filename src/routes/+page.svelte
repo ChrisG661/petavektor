@@ -123,6 +123,19 @@
         let bearing = turf.bearing(start, end);
         let distanceX = turf.distance([0, 0], [x, 0], { units: "meters" });
         let distanceY = turf.distance([0, 0], [0, y], { units: "meters" });
+        if (bearing >= 0 && bearing <= 90) {
+          distanceX = distanceX;
+          distanceY = distanceY;
+        } else if (bearing >= -90 && bearing <= 0) {
+          distanceX = distanceX * -1;
+          distanceY = distanceY;
+        } else if (bearing >= -180 && bearing <= -90) {
+          distanceX = distanceX * -1;
+          distanceY = distanceY * -1;
+        } else if (bearing >= 90 && bearing <= 180) {
+          distanceX = distanceX;
+          distanceY = distanceY * -1;
+        }
         return {
           start,
           end,
@@ -137,7 +150,6 @@
       calculateRoute = async (start, destination, tolerance) => {
         return await getRouteGeometry(start, destination, true).then(
           (coordinates) => {
-            console.log(coordinates);
             let geometry = coordinates;
             let simplified = turf.simplify(turf.lineString(coordinates), {
               tolerance: tolerance,
@@ -179,9 +191,10 @@
           let simplified = turf.simplify(turf.lineString(coordinates), {
             tolerance: threshold,
           });
-          L.polyline(simplified.geometry.coordinates, {
+          let simplifiedRoute = L.polyline(simplified.geometry.coordinates, {
             className: "stroke-blue-400",
           }).addTo(map);
+          map.fitBounds(simplifiedRoute.getBounds());
           //calculateRoute(start, destination, threshold);
         });
       };
@@ -199,7 +212,9 @@
         let start_name = vector.start_name;
         let end_name = vector.end_name;
 
-        let vectorLine = L.polyline([start, end], { color: "#2563eb" })
+        let vectorLine = L.polyline([start, end], {
+          className: "stroke-orange-400",
+        })
           .addTo(map)
           .arrowheads({ size: "12px", fill: true, yawn: 40 });
         //let startPoint = L.circleMarker(start, { color: "#1d4ed8" }).addTo(map);
@@ -215,6 +230,9 @@
     }
   });
 
+  let vectorCount = 0;
+  let vectorSum = 0;
+  let totalDistance = 0;
   async function loadRoute(route) {
     currentRoute = route;
     currentVectorIndex = 0;
@@ -229,7 +247,7 @@
         break;
       }
       case "sdh": {
-        destination = [1.46146, 124.837412];
+        destination = [1.460959, 124.837373];
         name = "Sekolah Dian Harapan Manado";
         break;
       }
@@ -239,14 +257,36 @@
         break;
       }
     }
+    destinationPoint = name;
 
     if (browser) {
+      const turf = await import("@turf/turf");
+      L.marker(destination).addTo(map).bindPopup(name);
       let data = await calculateRoute(start, destination, threshold);
       savedRoutes[route] = { name, ...data };
       drawRoute(start, destination, true);
-      drawVector(savedRoutes[route].vectors[currentVectorIndex]);
+      let vector = savedRoutes[currentRoute]?.vectors[0];
+      currentVectorName = vector.name;
+      console.log(vector);
+      currentVector = vector;
+      currentVectorIndex = 0;
+
+      vectorCount = savedRoutes[currentRoute]?.vectors.length;
+      let vectorSumX = 0;
+      let vectorSumY = 0;
+      savedRoutes[currentRoute].vectors.forEach((vector) => {
+        vectorSumX += vector.distanceX;
+        vectorSumY += vector.distanceY;
+      });
+      console.log(vectorSumX, vectorSumY);
+      vectorSum = Math.sqrt(vectorSumX ** 2 + vectorSumY ** 2);
+      //vectorSum = turf.distance(start, destination);
+      savedRoutes[currentRoute].vectors.forEach((vector) => {
+        totalDistance += vector.distance;
+      });
+      totalDistance =
+        Math.round((totalDistance / 1000 + Number.EPSILON) * 100) / 100;
     }
-    console.log(route, currentRoute);
   }
 
   onDestroy(async () => {
@@ -269,15 +309,29 @@
     bearing: 0,
   };
   let currentVectorIndex = 0;
-
+  let destinationPoint = "";
+  let currentVectorName = "?";
   function viewVector(index) {
     console.log(index);
     let vector = savedRoutes[currentRoute]?.vectors[index];
+    currentVectorName = vector.name;
     console.log(vector);
     currentVector = vector;
     currentVectorIndex = index;
     drawVector(vector);
+    map.eachLayer(function (layer) {
+      console.log(layer);
+    });
   }
+  import katex from "katex";
+
+  $: vectorNotation = katex.renderToString(
+    `\\overrightarrow{${currentVectorName}}`,
+    {
+      displayMode: false,
+      throwOnError: false,
+    }
+  );
 </script>
 
 <main class="h-screen w-screen">
@@ -290,27 +344,35 @@
         <Button id="linow" on:click={() => loadRoute("linow")}>Linow</Button>
       </ButtonGroup>
       <div>
-        <Label for="start-point" class="mb-2">Titik awal</Label>
+        <label for="start-point" class="mb-2  text-sm font-semibold"
+          >Titik awal</label
+        >
         <Input
           type="text"
           id="start-point"
           size="sm"
-          placeholder="Rumah Christopher"
+          placeholder=""
           required
+          disabled
+          value="Rumah Christopher"
         />
       </div>
       <div>
-        <Label for="destination-point" class="mb-2">Titik akhir</Label>
+        <label for="destination-point" class="mb-2 text-sm font-semibold"
+          >Titik akhir</label
+        >
         <Input
           type="text"
           id="destination-point"
           size="sm"
           placeholder=""
           required
+          disabled
+          bind:value={destinationPoint}
         />
       </div>
       <div class="gap-y-2">
-        <Heading tag="h5" class="mb-2">Vektor {currentVector?.name}</Heading>
+        <span class="mb-2">Vektor {@html vectorNotation}</span>
 
         <div class="flex flex-row gap-x-2 gap-y-2">
           <div>
@@ -321,9 +383,10 @@
               type="text"
               id="start-vector"
               size="sm"
-              placeholder="0"
+              placeholder="-"
               required
               disabled
+              bind:value={currentVector.start_name}
             />
           </div>
           <div>
@@ -334,16 +397,17 @@
               type="text"
               id="end-vector"
               size="sm"
-              placeholder="0"
+              placeholder="-"
               required
               disabled
+              bind:value={currentVector.end_name}
             />
           </div>
         </div>
         <div class="flex flex-row gap-x-2">
           <div>
             <label for="distance-x" class="mb-2 text-sm font-semibold"
-              >Komponen X</label
+              >Komponen X (m)</label
             >
             <Input
               type="number"
@@ -352,11 +416,12 @@
               placeholder="0"
               required
               disabled
+              bind:value={currentVector.distanceX}
             />
           </div>
           <div>
             <label for="distance-y" class="mb-2 text-sm font-semibold"
-              >Komponen Y</label
+              >Komponen Y (m)</label
             >
             <Input
               type="number"
@@ -365,12 +430,13 @@
               placeholder="0"
               required
               disabled
+              bind:value={currentVector.distanceY}
             />
           </div>
         </div>
         <div>
           <label for="distance" class="mb-2  text-sm font-semibold"
-            >Panjang</label
+            >Panjang (m)</label
           >
           <Input
             type="number"
@@ -379,6 +445,7 @@
             placeholder="0"
             required
             disabled
+            bind:value={currentVector.distance}
           />
         </div>
         <div class="flex flex-wrap items-center gap-2 mt-4">
@@ -423,10 +490,35 @@
           </Button>
         </div>
       </div>
+      <span class="absolute left-4 bottom-4 text-xs text-gray-400"
+        >Christopher G (2022)</span
+      >
     </div>
-    <div class="w-full"><div bind:this={mapElement} class="h-screen" /></div>
+    <div class="w-full z-0 ">
+      <div bind:this={mapElement} class="h-screen" />
+    </div>
+    <div
+      class="flex flex-col font-medium text-xs text-gray-500 absolute bg-white z-10 rounded-lg right-4 top-4 p-4 w-56"
+    >
+      <span>Banyak vektor: <span>{vectorCount}</span> vektor</span>
+      <span
+        >Panjang penjumlahan vektor: <span>{vectorSum}</span>
+        km</span
+      >
+      <span>Jarak total: <span>{totalDistance}</span> km</span>
+    </div>
   </div>
 </main>
+
+<svelte:head>
+  <title>Peta Vektor | Formatif 2 Matematika Lanjutan</title>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+    integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X"
+    crossorigin="anonymous"
+  />
+</svelte:head>
 
 <style>
   @import "leaflet/dist/leaflet.css";
