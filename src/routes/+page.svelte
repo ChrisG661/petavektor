@@ -280,9 +280,9 @@
         console.log(vectorSumX, vectorSumY);
       });
       console.log(vectorSumX, vectorSumY);
-      vectorSum = Math.sqrt(vectorSumX ** 2 + vectorSumY ** 2);
-      vectorSum = Math.round((vectorSum / 1000 + Number.EPSILON) * 100) / 100;
-      //vectorSum = turf.distance(start, destination);
+      //vectorSum = Math.sqrt(vectorSumX ** 2 + vectorSumY ** 2);
+      vectorSum = turf.distance(start, destination);
+      vectorSum = Math.round((vectorSum + Number.EPSILON) * 100) / 100;
       savedRoutes[currentRoute].vectors.forEach((vector) => {
         totalDistance += vector.distance;
       });
