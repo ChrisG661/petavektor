@@ -17,7 +17,8 @@
   let calculateRoute;
   let currentRoute;
   let drawVector;
-  let threshold = 0.00003;
+  let faktorNilai,
+    tolerance = 0.00003;
   // @ts-ignore
   let savedRoutes = {
     /*
@@ -44,6 +45,12 @@
       ],
     },*/
   };
+
+  function round(value, decimals = 5) {
+    return (
+      Math.round((value + Number.EPSILON) * 10 ** decimals) / 10 ** decimals
+    );
+  }
 
   function numberToLetters(num) {
     var s = "",
@@ -84,7 +91,6 @@
       }).addTo(map);
 
       L.marker([1.437757, 124.790186]).addTo(map).bindPopup("Rumah");
-      //.openPopup();
 
       async function getRouteGeometry(start, destination, full) {
         const geometry = await fetch(
@@ -125,19 +131,19 @@
         let bearing = turf.bearing(start, end);
         let distanceX = turf.distance([0, 0], [x, 0], { units: "meters" });
         let distanceY = turf.distance([0, 0], [0, y], { units: "meters" });
-        bearing = bearing;
-        if (bearing >= -90 && bearing <= 0) {
+        bearing = bearing + 90;
+        if (bearing >= 0 && bearing <= 90) {
           distanceX = distanceX;
           distanceY = distanceY;
-        } else if (bearing >= -180 && bearing <= -90) {
+        } else if (bearing >= -90 && bearing <= 0) {
           distanceX = distanceX * -1;
           distanceY = distanceY;
           position = [position[0] * -1, position[1]];
-        } else if (bearing >= 0 && bearing <= 90) {
+        } else if (bearing >= 90 && bearing <= 180) {
           distanceX = distanceX;
           distanceY = distanceY * -1;
           position = [position[0], position[1] * -1];
-        } else if (bearing >= 90 && bearing <= 180) {
+        } else if (bearing >= 180 && bearing <= 270) {
           distanceX = distanceX * -1;
           distanceY = distanceY * -1;
           position = [position[0] * -1, position[1] * -1];
@@ -195,35 +201,25 @@
             className: "stroke-gray-600 opacity-75",
           }).addTo(map);
           let simplified = turf.simplify(turf.lineString(coordinates), {
-            tolerance: threshold,
+            tolerance: tolerance,
           });
           let simplifiedRoute = L.polyline(simplified.geometry.coordinates, {
             className: "stroke-blue-400",
           }).addTo(map);
           map.fitBounds(simplifiedRoute.getBounds());
-          //calculateRoute(start, destination, threshold);
         });
       };
 
       drawVector = (vector) => {
         let start = vector.start;
         let end = vector.end;
-        let position = vector.position;
-        let distance = vector.distance;
-        let distanceX = vector.distanceX;
-        let distanceY = vector.distanceY;
-        let bearing = vector.bearing;
-        let name = vector.name;
-        let start_name = vector.start_name;
-        let end_name = vector.end_name;
 
+        let name = vector.name;
         let vectorLine = L.polyline([start, end], {
           className: "stroke-orange-400",
         })
           .addTo(map)
           .arrowheads({ size: "12px", fill: true, yawn: 40 });
-        //let startPoint = L.circleMarker(start, { color: "#1d4ed8" }).addTo(map);
-        //let endPoint = L.circleMarker(end, { color: "#1d4ed8" }).addTo(map);
         map.fitBounds(vectorLine.getBounds());
         vectorLine.bindTooltip(name);
       };
@@ -231,8 +227,6 @@
       function drawRoutePoint(coordinate) {
         L.circle(coordinate, { icon: L.divIcon() }).addTo(map);
       }
-      //drawRoute([1.437533, 124.79023], [1.46146, 124.837412], true);
-      //drawRoutePoint([1.46146, 124.837412]);
     }
   });
 
@@ -267,15 +261,21 @@
 
     if (browser) {
       const turf = await import("@turf/turf");
+      const L = await import("leaflet");
       L.marker(destination).addTo(map).bindPopup(name);
-      let data = await calculateRoute(start, destination, threshold);
+      let data = await calculateRoute(start, destination, tolerance);
       savedRoutes[route] = { name, ...data };
       drawRoute(start, destination, true);
       let vector = savedRoutes[currentRoute]?.vectors[0];
       currentVectorName = vector.name;
 
       currentVector = vector;
+      currentVector.distance = round(currentVector.distance);
+      currentVector.distanceX = round(currentVector.distanceX);
+      currentVector.distanceY = round(currentVector.distanceY);
+      currentVector.bearing = round(currentVector.bearing);
       currentVectorIndex = 0;
+
       vectorCount = savedRoutes[currentRoute]?.vectors.length;
       let vectorSumX = 0;
       let vectorSumY = 0;
@@ -284,12 +284,14 @@
         vectorSumY += vector.distanceY;
       });
       vectorSum = Math.sqrt(vectorSumX ** 2 + vectorSumY ** 2) / 1000;
-      vectorSum = Math.round((vectorSum + Number.EPSILON) * 100) / 100;
+      vectorSum = round(vectorSum, 3).toString().replace(".", ",");
+      totalDistance = 0;
       savedRoutes[currentRoute].vectors.forEach((vector) => {
         totalDistance += vector.distance;
       });
-      totalDistance =
-        Math.round((totalDistance / 1000 + Number.EPSILON) * 100) / 100;
+      totalDistance = round(totalDistance / 1000, 3)
+        .toString()
+        .replace(".", ",");
     }
   }
 
@@ -315,17 +317,22 @@
   let currentVectorIndex = 0;
   let destinationPoint = "";
   let currentVectorName = "?";
+
   function viewVector(index) {
     console.log(index);
     let vector = savedRoutes[currentRoute]?.vectors[index];
     currentVectorName = vector.name;
     console.log(vector);
     currentVector = vector;
+    currentVector.distance = round(currentVector.distance);
+    currentVector.distanceX = round(currentVector.distanceX);
+    currentVector.distanceY = round(currentVector.distanceY);
+    currentVector.bearing = round(currentVector.bearing);
     currentVectorIndex = index;
     drawVector(vector);
   }
-  import katex from "katex";
 
+  import katex from "katex";
   $: vectorNotation = katex.renderToString(
     `\\overrightarrow{${currentVectorName}}`,
     {
@@ -360,7 +367,7 @@
       </div>
       <div>
         <label for="destination-point" class="mb-2 text-sm font-semibold"
-          >Titik akhir</label
+          >Titik Tujuan</label
         >
         <Input
           type="text"
@@ -437,19 +444,35 @@
             />
           </div>
         </div>
-        <div>
-          <label for="distance" class="mb-2  text-sm font-semibold"
-            >Panjang (m)</label
-          >
-          <Input
-            type="number"
-            id="distance"
-            size="sm"
-            placeholder="0"
-            required
-            disabled
-            bind:value={currentVector.distance}
-          />
+        <div class="flex flex-row gap-x-2">
+          <div>
+            <label for="distance" class="mb-2  text-sm font-semibold"
+              >Panjang (m)</label
+            >
+            <Input
+              type="number"
+              id="distance"
+              size="sm"
+              placeholder="0"
+              required
+              disabled
+              bind:value={currentVector.distance}
+            />
+          </div>
+          <div>
+            <label for="bearing" class="mb-2  text-sm font-semibold"
+              >Arah (°)</label
+            >
+            <Input
+              type="number"
+              id="bearing"
+              size="sm"
+              placeholder="0"
+              required
+              disabled
+              bind:value={currentVector.bearing}
+            />
+          </div>
         </div>
         <div class="flex flex-wrap items-center gap-2 mt-4">
           <Button
