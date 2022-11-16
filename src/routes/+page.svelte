@@ -123,6 +123,7 @@
         let bearing = turf.bearing(start, end);
         let distanceX = turf.distance([0, 0], [x, 0], { units: "meters" });
         let distanceY = turf.distance([0, 0], [0, y], { units: "meters" });
+        bearing += 90;
         if (bearing >= 0 && bearing <= 90) {
           distanceX = distanceX;
           distanceY = distanceY;
@@ -220,6 +221,7 @@
         //let startPoint = L.circleMarker(start, { color: "#1d4ed8" }).addTo(map);
         //let endPoint = L.circleMarker(end, { color: "#1d4ed8" }).addTo(map);
         map.fitBounds(vectorLine.getBounds());
+        vectorLine.bindTooltip(name);
       };
 
       function drawRoutePoint(coordinate) {
@@ -321,9 +323,6 @@
     currentVector = vector;
     currentVectorIndex = index;
     drawVector(vector);
-    map.eachLayer(function (layer) {
-      console.log(layer);
-    });
   }
   import katex from "katex";
 
@@ -374,7 +373,9 @@
         />
       </div>
       <div class="gap-y-2">
-        <span class="mb-2">Vektor {@html vectorNotation}</span>
+        <span class="mb-2"
+          >Vektor {currentVectorIndex + 1}: {@html vectorNotation}</span
+        >
 
         <div class="flex flex-row gap-x-2 gap-y-2">
           <div>
