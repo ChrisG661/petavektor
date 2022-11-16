@@ -8,9 +8,11 @@
     Helper,
     ButtonGroup,
     Button,
+    Modal,
     Range,
+    A,
   } from "flowbite-svelte";
-
+  let openModal = true;
   let mapElement;
   let map;
   let drawRoute;
@@ -238,22 +240,22 @@
     currentRoute = route;
     currentVectorIndex = 0;
     currentVector = {};
-    let start = [1.437757, 124.790186];
+    let start = [1.437897, 124.790221];
     let destination = [0, 0];
     let name = "";
     switch (route) {
       case "rsup": {
-        destination = [1.455297, 124.807755];
+        destination = [1.455705, 124.807911];
         name = "RSUP Prof. Kandou";
         break;
       }
       case "sdh": {
-        destination = [1.460959, 124.837373];
+        destination = [1.460979, 124.837371];
         name = "Sekolah Dian Harapan Manado";
         break;
       }
       case "linow": {
-        destination = [1.272947, 124.822804];
+        destination = [1.273204, 124.822838];
         name = "Danau Linow";
         break;
       }
@@ -561,6 +563,38 @@
       <span>Jarak total: <span>{totalDistance}</span> km</span>
     </div>
   </div>
+
+  <Modal title="Halo!" bind:open={openModal} autoclose>
+    <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+      Saya Christopher Gijoh dari kelas 11B. Website ini adalah tugas Formatif 2
+      saya untuk pelajaran Matematika Lanjutan dengan topik Vektor. Saya membuat
+      vektor dari rumah saya menuju tiga tempat publik. Saya memilih tujuan
+      pertama yaitu RSUP Prof. Kandou, tujuan kedua yaitu SDH Manado, dan tujuan
+      ketiga yaitu Danau Linow.
+    </p>
+    <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+      Alur penghitungan vektor dimulai dari titik rumah dan titik tujuan yang
+      dipilih. Dari titik tersebut, saya mengambil rute terpendek menggunakan
+
+      <A class="font-medium hover:underline" href="https://project-osrm.org/"
+        >API OSRM</A
+      > yang menghasilkan titik-titik koordinat. Setelah mendapatkan daftar koordinat
+      rute, saya menyederhanakannya dengan algoritma
+      <A
+        class="font-medium hover:underline"
+        href="https://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm"
+        >Ramer-Douglas-Peucker</A
+      > agar banyak vektor berkurang. Dari setiap vektor tersebut kemudian dihitung
+      komponen, jarak, arah, juga jumlah keseluruhan atau resultan vektor. Vektor
+      yang sudah dihitung kemudian ditampilkan di peta <A
+        class="font-medium hover:underline"
+        href="https://openstreetmap.org">OpenStreetMap</A
+      >.
+    </p>
+    <svelte:fragment slot="footer">
+      <Button on:click={() => loadRoute("rsup")}>Mulai</Button>
+    </svelte:fragment>
+  </Modal>
 </main>
 
 <svelte:head>
