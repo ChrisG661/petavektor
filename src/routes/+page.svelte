@@ -173,7 +173,6 @@
                 start_name,
                 end_name,
               };
-              //console.log(vector);
 
               vectors.push(vector);
             }
@@ -207,7 +206,6 @@
       };
 
       drawVector = (vector) => {
-        console.dir(vector);
         let start = vector.start;
         let end = vector.end;
         let position = vector.position;
@@ -275,31 +273,17 @@
       drawRoute(start, destination, true);
       let vector = savedRoutes[currentRoute]?.vectors[0];
       currentVectorName = vector.name;
-      console.log(vector);
+
       currentVector = vector;
       currentVectorIndex = 0;
       vectorCount = savedRoutes[currentRoute]?.vectors.length;
       let vectorSumX = 0;
       let vectorSumY = 0;
-      /*
       savedRoutes[currentRoute].vectors.forEach((vector) => {
         vectorSumX += vector.distanceX;
         vectorSumY += vector.distanceY;
-        console.log(vectorSumX, vectorSumY);
-      });*/
-      /*
-      vectorSumX = start[0];
-      vectorSumY = start[1];
-      savedRoutes[currentRoute].vectors.forEach((vector) => {
-        vectorSumX += vector.position[0];
-        vectorSumY += vector.position[1];
-        L.marker(vectorSumX, vectorSumY).addTo(map);
-      });*/
-      //console.log(vectorSumX, vectorSumY);
-      //console.log(turf.distance([0, 0], [vectorSumX, vectorSumY]));
-      //vectorSum = Math.sqrt(vectorSumX ** 2 + vectorSumY ** 2);
-      //console.log(vectorSum, turf.distance(start, destination) * 1000);
-      vectorSum = turf.distance(start, destination);
+      });
+      vectorSum = Math.sqrt(vectorSumX ** 2 + vectorSumY ** 2) / 1000;
       vectorSum = Math.round((vectorSum + Number.EPSILON) * 100) / 100;
       savedRoutes[currentRoute].vectors.forEach((vector) => {
         totalDistance += vector.distance;
