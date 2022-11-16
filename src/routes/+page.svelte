@@ -14,6 +14,7 @@
   let mapElement;
   let map;
   let drawRoute;
+  let vectorComponents;
   let calculateRoute;
   let currentRoute;
   let drawVector;
@@ -121,7 +122,7 @@
         return geometry;
       }
 
-      let vectorComponents = (start, end) => {
+      vectorComponents = (start, end) => {
         let x = end[1] - start[1];
         let y = end[0] - start[0];
         let position = [x, y];
@@ -320,7 +321,22 @@
 
   function viewVector(index) {
     console.log(index);
-    let vector = savedRoutes[currentRoute]?.vectors[index];
+    let vector = {};
+    if (index == savedRoutes[currentRoute]?.vectors.length) {
+      vector = {
+        name: "R",
+        start: savedRoutes[currentRoute].start,
+        start_name: "A",
+        end: savedRoutes[currentRoute].destination,
+        end_name: numberToLetters(index + 1),
+        ...vectorComponents(
+          savedRoutes[currentRoute].start,
+          savedRoutes[currentRoute].destination
+        ),
+      };
+    } else {
+      vector = savedRoutes[currentRoute]?.vectors[index];
+    }
     currentVectorName = vector.name;
     console.log(vector);
     currentVector = vector;
@@ -477,8 +493,13 @@
         <div class="flex flex-wrap items-center gap-2 mt-4">
           <Button
             class="!p-2"
-            on:click={() => viewVector(currentVectorIndex - 1)}
-            disabled={currentVectorIndex == 0}
+            on:click={() => {
+              if (currentVectorIndex == 0) {
+                viewVector(savedRoutes[currentRoute]?.vectors.length);
+              } else {
+                viewVector(currentVectorIndex - 1);
+              }
+            }}
             ><svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -496,9 +517,15 @@
           </Button>
           <Button
             class="!p-2"
-            on:click={() => viewVector(currentVectorIndex + 1)}
-            disabled={currentVectorIndex ==
-              savedRoutes[currentRoute]?.vectors.length - 1}
+            on:click={() => {
+              if (
+                currentVectorIndex == savedRoutes[currentRoute]?.vectors.length
+              ) {
+                viewVector(0);
+              } else {
+                viewVector(currentVectorIndex + 1);
+              }
+            }}
             ><svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
