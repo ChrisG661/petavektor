@@ -19,6 +19,7 @@
   let vectorComponents;
   let calculateRoute;
   let currentRoute;
+  let markerLayer;
   let drawVector;
   let faktorNilai,
     tolerance = 0.00003;
@@ -87,13 +88,17 @@
       const arrowheads = await import("leaflet-arrowheads");
 
       map = L.map(mapElement).setView([1.438654, 124.790774], 13);
+      markerLayer = L.layerGroup().addTo(map);
+      let baseRouteLayer = L.layerGroup().addTo(map);
+      let simplifiedRouteLayer = L.layerGroup().addTo(map);
+      let vectorLayer = L.layerGroup().addTo(map);
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
 
-      L.marker([1.437757, 124.790186]).addTo(map).bindPopup("Rumah");
+      L.marker([1.437757, 124.790186]).addTo(markerLayer).bindPopup("Rumah");
 
       async function getRouteGeometry(start, destination, full) {
         const geometry = await fetch(
@@ -202,13 +207,13 @@
           L.polyline(coordinates, {
             weight: 4,
             className: "stroke-gray-600 opacity-75",
-          }).addTo(map);
+          }).addTo(baseRouteLayer);
           let simplified = turf.simplify(turf.lineString(coordinates), {
             tolerance: tolerance,
           });
           let simplifiedRoute = L.polyline(simplified.geometry.coordinates, {
             className: "stroke-blue-400",
-          }).addTo(map);
+          }).addTo(simplifiedRouteLayer);
           map.fitBounds(simplifiedRoute.getBounds());
         });
       };
@@ -218,18 +223,16 @@
         let end = vector.end;
 
         let name = vector.name;
+        vectorLayer.clearLayers();
         let vectorLine = L.polyline([start, end], {
-          className: "stroke-orange-400",
+          color: "#fb923c",
+          weight: 4,
         })
-          .addTo(map)
-          .arrowheads({ size: "12px", fill: true, yawn: 40 });
+          .addTo(vectorLayer)
+          .arrowheads({ size: "16px", fill: true, yawn: 40 });
         map.fitBounds(vectorLine.getBounds());
         vectorLine.bindTooltip(name);
       };
-
-      function drawRoutePoint(coordinate) {
-        L.circle(coordinate, { icon: L.divIcon() }).addTo(map);
-      }
     }
   });
 
@@ -265,7 +268,7 @@
     if (browser) {
       const turf = await import("@turf/turf");
       const L = await import("leaflet");
-      L.marker(destination).addTo(map).bindPopup(name);
+      L.marker(destination).addTo(markerLayer).bindPopup(name);
       let data = await calculateRoute(start, destination, tolerance);
       savedRoutes[route] = { name, ...data };
       drawRoute(start, destination, true);
