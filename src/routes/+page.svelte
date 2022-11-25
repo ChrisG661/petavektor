@@ -143,22 +143,8 @@
         let distanceX = turf.distance([0, 0], [x, 0], { units: "meters" });
         let distanceY = turf.distance([0, 0], [0, y], { units: "meters" });
         bearing = bearing + 90;
-        if (bearing >= 0 && bearing <= 90) {
-          distanceX = distanceX;
-          distanceY = distanceY;
-        } else if (bearing >= -90 && bearing <= 0) {
-          distanceX = distanceX * -1;
-          distanceY = distanceY;
-          position = [position[0] * -1, position[1]];
-        } else if (bearing >= 90 && bearing <= 180) {
-          distanceX = distanceX;
-          distanceY = distanceY * -1;
-          position = [position[0], position[1] * -1];
-        } else if (bearing >= 180 && bearing <= 270) {
-          distanceX = distanceX * -1;
-          distanceY = distanceY * -1;
-          position = [position[0] * -1, position[1] * -1];
-        }
+        distanceX *= Math.sign(position[0])
+        distanceY *= Math.sign(position[1])
 
         return {
           start,
