@@ -390,7 +390,6 @@
       throwOnError: false,
     }
   );
-  $: console.log(savedRoutes.kustom.enabled);
 </script>
 
 <main class="h-screen w-screen">
