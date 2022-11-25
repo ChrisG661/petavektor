@@ -12,8 +12,7 @@
     Range,
     A,
   } from "flowbite-svelte";
-  // let openModal = true;
-  let openModal = false;
+  let openModal = true;
   let mapElement;
   let map;
   let drawRoute;
@@ -421,7 +420,7 @@
           type="text"
           id="start-point"
           size="sm"
-          placeholder=""
+          placeholder={savedRoutes.kustom.enabled ? "<Lintang>, <Bujur>" : ""}
           required
           disabled={!savedRoutes.kustom.enabled}
           bind:value={startPoint}
@@ -435,7 +434,7 @@
           type="text"
           id="destination-point"
           size="sm"
-          placeholder=""
+          placeholder={savedRoutes.kustom.enabled ? "<Lintang>, <Bujur>" : ""}
           required
           disabled={!savedRoutes.kustom.enabled}
           bind:value={destinationPoint}
