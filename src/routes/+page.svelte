@@ -12,7 +12,8 @@
     Range,
     A,
   } from "flowbite-svelte";
-  let openModal = true;
+  // let openModal = true;
+  let openModal = false;
   let mapElement;
   let map;
   let drawRoute;
@@ -48,6 +49,9 @@
         },
       ],
     },*/
+    kustom: {
+      enabled: false,
+    },
   };
 
   function round(value, decimals = 5) {
@@ -240,11 +244,28 @@
   let vectorSum = 0;
   let totalDistance = 0;
   async function loadRoute(route) {
+    let start = [0, 0];
+    let destination = [0, 0];
+    if (route == "kustom") {
+      if (startPoint == "" || destinationPoint == "") {
+        return;
+      }
+      savedRoutes.kustom.enabled = true;
+      start = startPoint.split(",").map((item) => {
+        return parseFloat(item);
+      });
+      destination = destinationPoint.split(",").map((item) => {
+        return parseFloat(item);
+      });
+    } else {
+      startPoint = "Rumah Christopher";
+      start = [1.437897, 124.790221];
+      destination = [0, 0];
+      savedRoutes.kustom.enabled = false;
+    }
     currentRoute = route;
     currentVectorIndex = 0;
     currentVector = {};
-    let start = [1.437897, 124.790221];
-    let destination = [0, 0];
     let name = "";
     switch (route) {
       case "rsup": {
@@ -262,15 +283,24 @@
         name = "Danau Linow";
         break;
       }
+      case "kustom": {
+        name = "Kustom";
+        break;
+      }
     }
-    destinationPoint = name;
+
+    if (route != "kustom") destinationPoint = name;
 
     if (browser) {
       const turf = await import("@turf/turf");
       const L = await import("leaflet");
-      L.marker(destination).addTo(markerLayer).bindPopup(name);
       let data = await calculateRoute(start, destination, tolerance);
       savedRoutes[route] = { name, ...data };
+      if (route == "kustom") {
+        savedRoutes.kustom.enabled = true;
+        L.marker(start).addTo(markerLayer).bindPopup(startPoint);
+        L.marker(destination).addTo(markerLayer).bindPopup(destinationPoint);
+      } else L.marker(destination).addTo(markerLayer).bindPopup(name);
       drawRoute(start, destination, true);
       let vector = savedRoutes[currentRoute]?.vectors[0];
       currentVectorName = vector.name;
@@ -321,6 +351,7 @@
     bearing: 0,
   };
   let currentVectorIndex = 0;
+  let startPoint = "";
   let destinationPoint = "";
   let currentVectorName = "?";
 
@@ -361,6 +392,7 @@
       throwOnError: false,
     }
   );
+  $: console.log(savedRoutes.kustom.enabled);
 </script>
 
 <main class="h-screen w-screen">
@@ -371,6 +403,15 @@
         <Button id="rsup" on:click={() => loadRoute("rsup")}>RSUP</Button>
         <Button id="sdh" on:click={() => loadRoute("sdh")}>SDH</Button>
         <Button id="linow" on:click={() => loadRoute("linow")}>Linow</Button>
+        <Button
+          id="kustom"
+          on:click={() => {
+            startPoint = "";
+            destinationPoint = "";
+            savedRoutes.kustom.enabled = true;
+            loadRoute("kustom");
+          }}>Kustom</Button
+        >
       </ButtonGroup>
       <div>
         <label for="start-point" class="mb-2  text-sm font-semibold"
@@ -382,8 +423,8 @@
           size="sm"
           placeholder=""
           required
-          disabled
-          value="Rumah Christopher"
+          disabled={!savedRoutes.kustom.enabled}
+          bind:value={startPoint}
         />
       </div>
       <div>
@@ -396,7 +437,7 @@
           size="sm"
           placeholder=""
           required
-          disabled
+          disabled={!savedRoutes.kustom.enabled}
           bind:value={destinationPoint}
         />
       </div>
@@ -495,7 +536,7 @@
             />
           </div>
         </div>
-        <div class="flex flex-wrap items-center gap-2 mt-4">
+        <div class="flex flex-wrap items-center gap-2 mt-4 w-full">
           <Button
             class="!p-2"
             on:click={() => {
@@ -546,6 +587,17 @@
               />
             </svg>
           </Button>
+          {#if savedRoutes.kustom.enabled}
+            <Button
+              class="ml-auto"
+              outline
+              on:click={() => {
+                loadRoute("kustom");
+              }}
+            >
+              Hitung</Button
+            >
+          {/if}
         </div>
       </div>
       <span class="absolute left-4 bottom-4 text-xs text-gray-400"
