@@ -143,8 +143,8 @@
         let distanceX = turf.distance([0, 0], [x, 0], { units: "meters" });
         let distanceY = turf.distance([0, 0], [0, y], { units: "meters" });
         bearing = bearing + 90;
-        distanceX *= Math.sign(position[0])
-        distanceY *= Math.sign(position[1])
+        distanceX *= Math.sign(position[0]);
+        distanceY *= Math.sign(position[1]);
 
         return {
           start,
@@ -221,7 +221,29 @@
         })
           .addTo(vectorLayer)
           .arrowheads({ size: "16px", fill: true, yawn: 40 });
+        let vectorOpoint =
+          Math.abs(vector.bearing) > 90
+            ? [start[0] + vector.position[1], start[1]]
+            : [start[0], start[1] + vector.position[0]];
+        let vectorXpoints = [start, vectorOpoint];
+        let vectorYpoints = [vectorOpoint, end];
+        let vectorX = L.polyline(vectorXpoints, {
+          color: "gray",
+          weight: 2,
+          dashArray: "4",
+        })
+          .addTo(vectorLayer)
+          .arrowheads({ size: "10px", fill: true, yawn: 30 });
+        let vectorY = L.polyline(vectorYpoints, {
+          color: "gray",
+          weight: 2,
+          dashArray: "4",
+        })
+          .addTo(vectorLayer)
+          .arrowheads({ size: "8px", fill: true, yawn: 30 });
         map.fitBounds(vectorLine.getBounds());
+        vectorX.bindTooltip(`x = ${round(vector.distanceX)} m`);
+        vectorY.bindTooltip(`y = ${round(vector.distanceY)} m`);
         vectorLine.bindTooltip(name);
       };
     }
