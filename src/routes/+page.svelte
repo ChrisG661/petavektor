@@ -207,6 +207,8 @@
 
       drawRoute = async (start, destination, full = false) => {
         await getRouteGeometry(start, destination, full).then((coordinates) => {
+          baseRouteLayer.clearLayers();
+          simplifiedRouteLayer.clearLayers();
           L.polyline(coordinates, {
             weight: 4,
             className: "stroke-gray-600 opacity-75",
@@ -287,7 +289,6 @@
         break;
       }
     }
-
     if (route != "kustom") destinationPoint = name;
 
     if (browser) {
@@ -295,11 +296,9 @@
       const L = await import("leaflet");
       let data = await calculateRoute(start, destination, tolerance);
       savedRoutes[route] = { name, ...data };
-      if (route == "kustom") {
-        savedRoutes.kustom.enabled = true;
-        L.marker(start).addTo(markerLayer).bindPopup(startPoint);
-        L.marker(destination).addTo(markerLayer).bindPopup(destinationPoint);
-      } else L.marker(destination).addTo(markerLayer).bindPopup(name);
+      markerLayer.clearLayers();
+      L.marker(start).addTo(markerLayer).bindPopup(startPoint);
+      L.marker(destination).addTo(markerLayer).bindPopup(destinationPoint);
       drawRoute(start, destination, true);
       let vector = savedRoutes[currentRoute]?.vectors[0];
       currentVectorName = vector.name;
