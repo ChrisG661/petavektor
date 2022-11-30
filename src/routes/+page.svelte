@@ -381,8 +381,10 @@
         end: savedRoutes[currentRoute].destination,
         end_name: numberToLetters(index + 1),
         ...vectorComponents(
-          savedRoutes[currentRoute].start,
-          savedRoutes[currentRoute].destination
+          savedRoutes[currentRoute].vectors[0].start,
+          savedRoutes[currentRoute].vectors[
+            savedRoutes[currentRoute].vectors.length - 1
+          ].end
         ),
       };
     } else {
