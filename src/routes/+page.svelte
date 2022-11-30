@@ -12,6 +12,7 @@
     Range,
     A,
   } from "flowbite-svelte";
+  import katex from "katex";
   let openModal = true;
   let mapElement;
   let map;
@@ -244,7 +245,13 @@
         map.fitBounds(vectorLine.getBounds());
         vectorX.bindTooltip(`x = ${round(vector.distanceX)} m`);
         vectorY.bindTooltip(`y = ${round(vector.distanceY)} m`);
-        vectorLine.bindTooltip(name);
+        //vectorLine.bindTooltip(name);
+        vectorLine.bindTooltip(
+          katex.renderToString(`\\overrightarrow{${name}}`, {
+            displayMode: false,
+            throwOnError: false,
+          })
+        );
       };
     }
   });
@@ -390,7 +397,6 @@
     drawVector(vector);
   }
 
-  import katex from "katex";
   $: vectorNotation = katex.renderToString(
     `\\overrightarrow{${currentVectorName}}`,
     {
