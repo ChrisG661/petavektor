@@ -607,7 +607,6 @@
             class="!p-2"
             on:click={() => {
               playVector = !playVector;
-              console.log("play");
               if (playVector) {
                 cycles = [];
               }
@@ -616,7 +615,6 @@
                 i < savedRoutes[currentRoute]?.vectors.length && playVector;
                 i++
               ) {
-                console.log(playVector);
                 cycles.push(
                   setTimeout(() => {
                     if (!playVector) {
@@ -626,7 +624,6 @@
                   }, 1000 * i)
                 );
               }
-              console.log(cycles);
               if (!playVector) {
                 cycles.forEach((cycle) => {
                   clearTimeout(cycle);
