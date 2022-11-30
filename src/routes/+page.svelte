@@ -437,6 +437,12 @@
   let cycles = [];
 
   let vectorNotation = true;
+
+  $: if (!playVector) {
+    cycles.forEach((cycle) => {
+      clearTimeout(cycle);
+    });
+  }
 </script>
 
 <main class="h-screen w-screen">
@@ -765,11 +771,6 @@
                     }
                   }, 1000 * i)
                 );
-              }
-              if (!playVector) {
-                cycles.forEach((cycle) => {
-                  clearTimeout(cycle);
-                });
               }
             }}
             >{#if playVector}
