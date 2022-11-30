@@ -11,6 +11,7 @@
     Modal,
     Range,
     A,
+    Toggle,
   } from "flowbite-svelte";
   import katex from "katex";
   let openModal = true;
@@ -401,16 +402,10 @@
     drawVector(vector);
   }
 
-  $: vectorNotation = katex.renderToString(
-    `\\overrightarrow{${currentVectorName}}`,
-    {
-      displayMode: false,
-      throwOnError: false,
-    }
-  );
-
   let playVector = false;
   let cycles = [];
+
+  let vectorNotation = false;
 </script>
 
 <main class="h-screen w-screen">
@@ -460,100 +455,191 @@
         />
       </div>
       <div class="gap-y-2">
-        <span class="mb-2"
-          >Vektor {currentVectorIndex + 1}: {@html vectorNotation}</span
-        >
+        <div class="flex flex-row items-center h-9">
+          <span class="mr-2">Vektor {currentVectorIndex + 1}:</span>
+          {@html katex.renderToString(
+            `\\overrightarrow{${currentVectorName}}`,
+            {
+              displayMode: false,
+              throwOnError: false,
+            }
+          )}
+          <Toggle size="small" bind:checked={vectorNotation} class="ml-auto"
+            >Notasi</Toggle
+          >
+        </div>
+        {#if !vectorNotation}
+          <div>
+            <div class="flex flex-row gap-x-2 gap-y-2">
+              <div>
+                <label for="start-vector" class="mb-2 text-sm font-semibold"
+                  >Pangkal</label
+                >
+                <Input
+                  type="text"
+                  id="start-vector"
+                  size="sm"
+                  placeholder="-"
+                  required
+                  disabled
+                  bind:value={currentVector.start_name}
+                />
+              </div>
+              <div>
+                <label for="end-vector" class="mb-2 text-sm font-semibold"
+                  >Ujung</label
+                >
+                <Input
+                  type="text"
+                  id="end-vector"
+                  size="sm"
+                  placeholder="-"
+                  required
+                  disabled
+                  bind:value={currentVector.end_name}
+                />
+              </div>
+            </div>
+            <div class="flex flex-row gap-x-2">
+              <div>
+                <label for="distance-x" class="mb-2 text-sm font-semibold"
+                  >Komponen X (m)</label
+                >
+                <Input
+                  type="number"
+                  id="distance-x"
+                  size="sm"
+                  placeholder="0"
+                  required
+                  disabled
+                  bind:value={currentVector.distanceX}
+                />
+              </div>
+              <div>
+                <label for="distance-y" class="mb-2 text-sm font-semibold"
+                  >Komponen Y (m)</label
+                >
+                <Input
+                  type="number"
+                  id="distance-y"
+                  size="sm"
+                  placeholder="0"
+                  required
+                  disabled
+                  bind:value={currentVector.distanceY}
+                />
+              </div>
+            </div>
+            <div class="flex flex-row gap-x-2">
+              <div>
+                <label for="distance" class="mb-2  text-sm font-semibold"
+                  >Panjang (m)</label
+                >
+                <Input
+                  type="number"
+                  id="distance"
+                  size="sm"
+                  placeholder="0"
+                  required
+                  disabled
+                  bind:value={currentVector.distance}
+                />
+              </div>
+              <div>
+                <label for="bearing" class="mb-2  text-sm font-semibold"
+                  >Arah (°)</label
+                >
+                <Input
+                  type="number"
+                  id="bearing"
+                  size="sm"
+                  placeholder="0"
+                  required
+                  disabled
+                  bind:value={currentVector.bearing}
+                />
+              </div>
+            </div>
+          </div>
+        {:else}
+          <div>
+            <div class="flex flex-row">
+              <label for="start-vector" class="mb-1 text-sm font-semibold"
+                >Pangkal</label
+              >
+              <div class="ml-auto">
+                {@html katex.renderToString(
+                  `${currentVector.start_name || "A"}`,
+                  {
+                    displayMode: false,
+                    throwOnError: false,
+                  }
+                )}
+              </div>
+            </div>
+            <div class="flex flex-row">
+              <label for="start-vector" class="mb-1 text-sm font-semibold"
+                >Ujung</label
+              >
+              <div class="ml-auto">
+                {@html katex.renderToString(
+                  `${currentVector.end_name || "B"}`,
+                  {
+                    displayMode: false,
+                    throwOnError: false,
+                  }
+                )}
+              </div>
+            </div>
+            <div>
+              <label for="start-vector" class="text-sm font-semibold"
+                >Komponen</label
+              >
+              <div>
+                {@html katex.renderToString(
+                  `\\overrightarrow{${currentVectorName}}=\\begin{pmatrix}
+                  ${currentVector.distanceX}\\\\${currentVector.distanceY}
+                  \\end{pmatrix}`,
+                  {
+                    displayMode: true,
+                    throwOnError: false,
+                  }
+                )}
+              </div>
+            </div>
+            <div>
+              <label for="start-vector" class="mb-2 text-sm font-semibold"
+                >Panjang</label
+              >
+              <div>
+                {@html katex.renderToString(
+                  `\\begin{align*}|\\overrightarrow{${currentVectorName}}|&=
+                  \\sqrt{${currentVector.distanceX}^2+${currentVector.distanceY}^2}
+                  \\\\&=${currentVector.distance}\\end{align*}`,
+                  {
+                    displayMode: true,
+                    throwOnError: false,
+                  }
+                )}
+              </div>
+            </div>
+            <div class="flex flex-row">
+              <label for="start-vector" class="mb-1 text-sm font-semibold"
+                >Arah</label
+              >
+              <div class="ml-auto">
+                {@html katex.renderToString(
+                  `${currentVector.bearing || 0}\\degree`,
+                  {
+                    displayMode: false,
+                    throwOnError: false,
+                  }
+                )}
+              </div>
+            </div>
+          </div>
+        {/if}
 
-        <div class="flex flex-row gap-x-2 gap-y-2">
-          <div>
-            <label for="start-vector" class="mb-2 text-sm font-semibold"
-              >Pangkal</label
-            >
-            <Input
-              type="text"
-              id="start-vector"
-              size="sm"
-              placeholder="-"
-              required
-              disabled
-              bind:value={currentVector.start_name}
-            />
-          </div>
-          <div>
-            <label for="end-vector" class="mb-2 text-sm font-semibold"
-              >Ujung</label
-            >
-            <Input
-              type="text"
-              id="end-vector"
-              size="sm"
-              placeholder="-"
-              required
-              disabled
-              bind:value={currentVector.end_name}
-            />
-          </div>
-        </div>
-        <div class="flex flex-row gap-x-2">
-          <div>
-            <label for="distance-x" class="mb-2 text-sm font-semibold"
-              >Komponen X (m)</label
-            >
-            <Input
-              type="number"
-              id="distance-x"
-              size="sm"
-              placeholder="0"
-              required
-              disabled
-              bind:value={currentVector.distanceX}
-            />
-          </div>
-          <div>
-            <label for="distance-y" class="mb-2 text-sm font-semibold"
-              >Komponen Y (m)</label
-            >
-            <Input
-              type="number"
-              id="distance-y"
-              size="sm"
-              placeholder="0"
-              required
-              disabled
-              bind:value={currentVector.distanceY}
-            />
-          </div>
-        </div>
-        <div class="flex flex-row gap-x-2">
-          <div>
-            <label for="distance" class="mb-2  text-sm font-semibold"
-              >Panjang (m)</label
-            >
-            <Input
-              type="number"
-              id="distance"
-              size="sm"
-              placeholder="0"
-              required
-              disabled
-              bind:value={currentVector.distance}
-            />
-          </div>
-          <div>
-            <label for="bearing" class="mb-2  text-sm font-semibold"
-              >Arah (°)</label
-            >
-            <Input
-              type="number"
-              id="bearing"
-              size="sm"
-              placeholder="0"
-              required
-              disabled
-              bind:value={currentVector.bearing}
-            />
-          </div>
-        </div>
         <div class="flex flex-wrap items-center gap-2 mt-4 w-full">
           <Button
             class="!p-2"
