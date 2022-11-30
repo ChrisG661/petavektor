@@ -595,7 +595,7 @@
             </div>
             <div>
               <label for="start-vector" class="text-sm font-semibold"
-                >Komponen</label
+                >Komponen (m)</label
               >
               <div>
                 {@html katex.renderToString(
@@ -615,7 +615,7 @@
             </div>
             <div>
               <label for="start-vector" class="mb-2 text-sm font-semibold"
-                >Panjang</label
+                >Panjang (m)</label
               >
               <div>
                 {@html katex.renderToString(
