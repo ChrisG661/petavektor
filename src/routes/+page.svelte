@@ -262,6 +262,7 @@
   async function loadRoute(route) {
     let start = [0, 0];
     let destination = [0, 0];
+    playVector = false;
     if (route == "kustom") {
       if (startPoint == "" || destinationPoint == "") {
         return;
@@ -311,6 +312,7 @@
       const L = await import("leaflet");
       let data = await calculateRoute(start, destination, tolerance);
       savedRoutes[route] = { name, ...data };
+      if (route == "kustom") savedRoutes[route].enabled = true;
       markerLayer.clearLayers();
       L.marker(start).addTo(markerLayer).bindPopup(startPoint);
       L.marker(destination).addTo(markerLayer).bindPopup(destinationPoint);
