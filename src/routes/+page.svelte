@@ -746,7 +746,7 @@
               }
               for (
                 let i = 0;
-                i < savedRoutes[currentRoute]?.vectors.length && playVector;
+                i < savedRoutes[currentRoute]?.vectors.length + 1 && playVector;
                 i++
               ) {
                 cycles.push(
@@ -754,7 +754,14 @@
                     if (!playVector) {
                       return;
                     }
-                    viewVector(currentVectorIndex + 1);
+                    if (
+                      currentVectorIndex ==
+                      savedRoutes[currentRoute]?.vectors.length + 1
+                    ) {
+                      viewVector(0);
+                    } else {
+                      viewVector(currentVectorIndex + 1);
+                    }
                   }, 1000 * i)
                 );
               }
