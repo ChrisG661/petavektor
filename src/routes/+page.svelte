@@ -377,9 +377,11 @@
     if (index == savedRoutes[currentRoute]?.vectors.length) {
       vector = {
         name: "R",
-        start: savedRoutes[currentRoute].start,
+        start: savedRoutes[currentRoute].vectors[0].start,
         start_name: "A",
-        end: savedRoutes[currentRoute].destination,
+        end: savedRoutes[currentRoute].vectors[
+          savedRoutes[currentRoute].vectors.length - 1
+        ].end,
         end_name: numberToLetters(index + 1),
         ...vectorComponents(
           savedRoutes[currentRoute].vectors[0].start,
