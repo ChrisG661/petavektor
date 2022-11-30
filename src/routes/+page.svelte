@@ -181,6 +181,48 @@
 
               vectors.push(vector);
             }
+
+            let vectorResultantDirect = {
+              name: "R",
+              start: vectors[0].start,
+              start_name: "A",
+              end: vectors[vectors.length - 1].end,
+              end_name: numberToLetters(simplified.length),
+              ...vectorComponents(
+                vectors[0].start,
+                vectors[vectors.length - 1].end
+              ),
+            };
+            console.log(vectorResultantDirect);
+
+            let vectorSumX = 0;
+            let vectorSumY = 0;
+            vectors.forEach((vector) => {
+              vectorSumX += vector.distanceX;
+              vectorSumY += vector.distanceY;
+            });
+            console.log(
+              "Langsung",
+              vectorResultantDirect.distanceX,
+              vectorResultantDirect.distanceY
+            );
+            console.log("Jumlah", vectorSumX, vectorSumY);
+            vectorSum = Math.sqrt(vectorSumX ** 2 + vectorSumY ** 2);
+            let vectorResultant = {
+              name: "S",
+              start: vectors[0].start,
+              start_name: "A",
+              end: vectors[vectors.length - 1].end,
+              end_name: numberToLetters(simplified.length),
+              ...vectorComponents(
+                vectors[0].start,
+                vectors[vectors.length - 1].end
+              ),
+              distanceX: vectorSumX,
+              distanceY: vectorSumY,
+              distance: vectorSum,
+            };
+            console.log(vectorResultant);
             return {
               start,
               destination,
@@ -188,6 +230,8 @@
               simplified,
               tolerance,
               vectors,
+              vectorResultantDirect,
+              vectorResultant,
             };
           }
         );
@@ -329,14 +373,10 @@
       currentVectorIndex = 0;
 
       vectorCount = savedRoutes[currentRoute]?.vectors.length;
-      let vectorSumX = 0;
-      let vectorSumY = 0;
-      savedRoutes[currentRoute].vectors.forEach((vector) => {
-        vectorSumX += vector.distanceX;
-        vectorSumY += vector.distanceY;
-      });
-      vectorSum = Math.sqrt(vectorSumX ** 2 + vectorSumY ** 2) / 1000;
-      vectorSum = round(vectorSum, 3).toString().replace(".", ",");
+      vectorSum = savedRoutes[currentRoute]?.vectorResultant.distance;
+      vectorSum = round(vectorSum / 1000, 3)
+        .toString()
+        .replace(".", ",");
       totalDistance = 0;
       savedRoutes[currentRoute].vectors.forEach((vector) => {
         totalDistance += vector.distance;
@@ -375,21 +415,9 @@
     console.log(index);
     let vector = {};
     if (index == savedRoutes[currentRoute]?.vectors.length) {
-      vector = {
-        name: "R",
-        start: savedRoutes[currentRoute].vectors[0].start,
-        start_name: "A",
-        end: savedRoutes[currentRoute].vectors[
-          savedRoutes[currentRoute].vectors.length - 1
-        ].end,
-        end_name: numberToLetters(index + 1),
-        ...vectorComponents(
-          savedRoutes[currentRoute].vectors[0].start,
-          savedRoutes[currentRoute].vectors[
-            savedRoutes[currentRoute].vectors.length - 1
-          ].end
-        ),
-      };
+      vector = savedRoutes[currentRoute]?.vectorResultantDirect;
+    } else if (index == savedRoutes[currentRoute]?.vectors.length + 1) {
+      vector = savedRoutes[currentRoute]?.vectorResultant;
     } else {
       vector = savedRoutes[currentRoute]?.vectors[index];
     }
@@ -458,7 +486,11 @@
       </div>
       <div class="gap-y-2">
         <div class="flex flex-row items-center h-9">
-          <span class="mr-2">Vektor {currentVectorIndex + 1}:</span>
+          <span class="mr-2"
+            >Vektor {#if currentVectorIndex == savedRoutes[currentRoute]?.vectors.length}Langsung
+            {:else if currentVectorIndex == savedRoutes[currentRoute]?.vectors.length + 1}Resultan{:else}{currentVectorIndex +
+                1}{/if}:</span
+          >
           {@html katex.renderToString(
             `\\overrightarrow{${currentVectorName || "a"}}`,
             {
@@ -655,7 +687,7 @@
             class="!p-2"
             on:click={() => {
               if (currentVectorIndex == 0) {
-                viewVector(savedRoutes[currentRoute]?.vectors.length);
+                viewVector(savedRoutes[currentRoute]?.vectors.length + 1);
               } else {
                 viewVector(currentVectorIndex - 1);
               }
@@ -679,7 +711,8 @@
             class="!p-2"
             on:click={() => {
               if (
-                currentVectorIndex == savedRoutes[currentRoute]?.vectors.length
+                currentVectorIndex ==
+                savedRoutes[currentRoute]?.vectors.length + 1
               ) {
                 viewVector(0);
               } else {
