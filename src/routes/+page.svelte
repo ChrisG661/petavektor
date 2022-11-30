@@ -654,8 +654,11 @@
                   `\\begin{align*}|\\overrightarrow{${
                     currentVectorName || "a"
                   }}|&=
-                  \\sqrt{${currentVector.distanceX || 0}^2+${
-                    currentVector.distanceY || 0
+                  \\sqrt{${currentVector.distanceX || 0}^2+
+                  ${
+                    Math.sign(currentVector.distanceY) == -1
+                      ? `(${currentVector.distanceY || 0})`
+                      : currentVector.distanceY || 0
                   }^2}
                   \\\\&=${currentVector.distance || 0}\\end{align*}`,
                   {
