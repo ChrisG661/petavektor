@@ -369,7 +369,7 @@
   let currentVectorIndex = 0;
   let startPoint = "";
   let destinationPoint = "";
-  let currentVectorName = "?";
+  let currentVectorName = "";
 
   function viewVector(index) {
     console.log(index);
@@ -458,7 +458,7 @@
         <div class="flex flex-row items-center h-9">
           <span class="mr-2">Vektor {currentVectorIndex + 1}:</span>
           {@html katex.renderToString(
-            `\\overrightarrow{${currentVectorName}}`,
+            `\\overrightarrow{${currentVectorName || "a"}}`,
             {
               displayMode: false,
               throwOnError: false,
@@ -597,8 +597,12 @@
               >
               <div>
                 {@html katex.renderToString(
-                  `\\overrightarrow{${currentVectorName}}=\\begin{pmatrix}
-                  ${currentVector.distanceX}\\\\${currentVector.distanceY}
+                  `\\overrightarrow{${
+                    currentVectorName || "a"
+                  }}=\\begin{pmatrix}
+                  ${currentVector.distanceX || 0}\\\\${
+                    currentVector.distanceY || 0
+                  }
                   \\end{pmatrix}`,
                   {
                     displayMode: true,
@@ -613,9 +617,13 @@
               >
               <div>
                 {@html katex.renderToString(
-                  `\\begin{align*}|\\overrightarrow{${currentVectorName}}|&=
-                  \\sqrt{${currentVector.distanceX}^2+${currentVector.distanceY}^2}
-                  \\\\&=${currentVector.distance}\\end{align*}`,
+                  `\\begin{align*}|\\overrightarrow{${
+                    currentVectorName || "a"
+                  }}|&=
+                  \\sqrt{${currentVector.distanceX || 0}^2+${
+                    currentVector.distanceY || 0
+                  }^2}
+                  \\\\&=${currentVector.distance || 0}\\end{align*}`,
                   {
                     displayMode: true,
                     throwOnError: false,
