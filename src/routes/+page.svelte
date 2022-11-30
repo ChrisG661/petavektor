@@ -184,7 +184,7 @@
             }
 
             let vectorResultantDirect = {
-              name: "R",
+              name: "H",
               start: vectors[0].start,
               start_name: "A",
               end: vectors[vectors.length - 1].end,
@@ -210,7 +210,7 @@
             console.log("Jumlah", vectorSumX, vectorSumY);
             vectorSum = Math.sqrt(vectorSumX ** 2 + vectorSumY ** 2);
             let vectorResultant = {
-              name: "S",
+              name: "R",
               start: vectors[0].start,
               start_name: "A",
               end: vectors[vectors.length - 1].end,
@@ -416,9 +416,9 @@
     console.log(index);
     let vector = {};
     if (index == savedRoutes[currentRoute]?.vectors.length) {
-      vector = savedRoutes[currentRoute]?.vectorResultantDirect;
-    } else if (index == savedRoutes[currentRoute]?.vectors.length + 1) {
       vector = savedRoutes[currentRoute]?.vectorResultant;
+    } else if (index == savedRoutes[currentRoute]?.vectors.length + 1) {
+      vector = savedRoutes[currentRoute]?.vectorResultantDirect;
     } else {
       vector = savedRoutes[currentRoute]?.vectors[index];
     }
@@ -494,8 +494,8 @@
       <div class="gap-y-2">
         <div class="flex flex-row items-center h-9">
           <span class="mr-2"
-            >Vektor {#if currentVectorIndex == savedRoutes[currentRoute]?.vectors.length}Langsung
-            {:else if currentVectorIndex == savedRoutes[currentRoute]?.vectors.length + 1}Resultan{:else}{currentVectorIndex +
+            >Vektor {#if currentVectorIndex == savedRoutes[currentRoute]?.vectors.length}Resultan
+            {:else if currentVectorIndex == savedRoutes[currentRoute]?.vectors.length + 1}Langsung{:else}{currentVectorIndex +
                 1}{/if}:</span
           >
           {@html katex.renderToString(
@@ -658,9 +658,13 @@
               >
               <div>
                 {@html katex.renderToString(
-                  `\\begin{align*}|\\overrightarrow{${
-                    currentVectorName || "a"
-                  }}|&=
+                  currentVector.name == "H"
+                    ? `|\\overrightarrow{${currentVectorName || "a"}}|=${
+                        currentVector.distance || 0
+                      }`
+                    : `\\begin{align*}|\\overrightarrow{${
+                        currentVectorName || "a"
+                      }}|&=
                   \\sqrt{${currentVector.distanceX || 0}^2+
                   ${
                     Math.sign(currentVector.distanceY) == -1
