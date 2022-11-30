@@ -436,7 +436,7 @@
   let playVector = false;
   let cycles = [];
 
-  let vectorNotation = false;
+  let vectorNotation = true;
 </script>
 
 <main class="h-screen w-screen">
