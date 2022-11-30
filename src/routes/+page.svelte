@@ -404,6 +404,9 @@
       throwOnError: false,
     }
   );
+
+  let playVector = false;
+  let cycles = [];
 </script>
 
 <main class="h-screen w-screen">
@@ -417,7 +420,7 @@
         <Button
           id="kustom"
           on:click={() => {
-            startPoint = "";
+            startPoint = "1.437757, 124.790186";
             destinationPoint = "";
             savedRoutes.kustom.enabled = true;
             loadRoute("kustom");
@@ -597,6 +600,68 @@
                 d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
               />
             </svg>
+          </Button>
+          <Button
+            class="!p-2"
+            on:click={() => {
+              playVector = !playVector;
+              console.log("play");
+              if (playVector) {
+                cycles = [];
+              }
+              for (
+                let i = 0;
+                i < savedRoutes[currentRoute]?.vectors.length && playVector;
+                i++
+              ) {
+                console.log(playVector);
+                cycles.push(
+                  setTimeout(() => {
+                    if (!playVector) {
+                      return;
+                    }
+                    viewVector(currentVectorIndex + 1);
+                  }, 1000 * i)
+                );
+              }
+              console.log(cycles);
+              if (!playVector) {
+                cycles.forEach((cycle) => {
+                  clearTimeout(cycle);
+                });
+              }
+            }}
+            >{#if playVector}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15.75 5.25v13.5m-7.5-13.5v13.5"
+                />
+              </svg>
+            {:else}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"
+                />
+              </svg>
+            {/if}
           </Button>
           {#if savedRoutes.kustom.enabled}
             <Button
