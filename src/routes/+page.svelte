@@ -142,7 +142,7 @@
         // let distance = turf.distance([start[1], start[0]], [end[1], end[0]], {
         //   units: "meters",
         // });
-        let bearing = turf.bearing(start, end);
+        let bearing = turf.bearing([start[1], start[0]], [end[1], end[0]]);
         let distanceX = turf.distance(
           [start[1], start[0]],
           [start[1] + x, start[0]],
@@ -154,7 +154,6 @@
           { units: "meters" }
         );
         let distance = Math.sqrt(distanceX ** 2 + distanceY ** 2);
-        bearing = bearing + 90;
         distanceX *= Math.sign(position[0]);
         distanceY *= Math.sign(position[1]);
 
