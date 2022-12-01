@@ -202,6 +202,16 @@
                 vectors[0].start,
                 vectors[vectors.length - 1].end
               ),
+              distance: turf.distance(
+                [vectors[0].start[1], vectors[0].start[0]],
+                [
+                  vectors[vectors.length - 1].end[1],
+                  vectors[vectors.length - 1].end[0],
+                ],
+                {
+                  units: "meters",
+                }
+              ),
             };
             console.log(vectorResultantDirect);
 
