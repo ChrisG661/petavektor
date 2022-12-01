@@ -846,7 +846,10 @@
         </div>
       </div>
       <span class="absolute left-4 bottom-4 text-xs text-gray-400"
-        >Christopher G (2022)</span
+        ><a
+          class="hover:text-blue-400"
+          href="https://github.com/ChrisG661/petavektor">Christopher G (2022)</a
+        ></span
       >
     </div>
     <div class="w-full z-0 ">
