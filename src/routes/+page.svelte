@@ -373,7 +373,7 @@
       currentVector.bearing = round(currentVector.bearing);
       currentVectorIndex = 0;
 
-      vectorCount = savedRoutes[currentRoute]?.vectors.length;
+      vectorCount = savedRoutes[currentRoute]?.vectors?.length;
       vectorSum = savedRoutes[currentRoute]?.vectorResultant.distance;
       vectorSum = round(vectorSum / 1000, 3)
         .toString()
@@ -415,9 +415,9 @@
   function viewVector(index) {
     console.log(index);
     let vector = {};
-    if (index == savedRoutes[currentRoute]?.vectors.length) {
+    if (index == savedRoutes[currentRoute]?.vectors?.length) {
       vector = savedRoutes[currentRoute]?.vectorResultant;
-    } else if (index == savedRoutes[currentRoute]?.vectors.length + 1) {
+    } else if (index == savedRoutes[currentRoute]?.vectors?.length + 1) {
       vector = savedRoutes[currentRoute]?.vectorResultantDirect;
     } else {
       vector = savedRoutes[currentRoute]?.vectors[index];
@@ -494,8 +494,8 @@
       <div class="gap-y-2">
         <div class="flex flex-row items-center h-9">
           <span class="mr-2"
-            >Vektor {#if currentVectorIndex == savedRoutes[currentRoute]?.vectors.length}Resultan
-            {:else if currentVectorIndex == savedRoutes[currentRoute]?.vectors.length + 1}Langsung{:else}{currentVectorIndex +
+            >Vektor {#if currentVectorIndex == savedRoutes[currentRoute]?.vectors?.length}Resultan
+            {:else if currentVectorIndex == savedRoutes[currentRoute]?.vectors?.length + 1}Langsung{:else}{currentVectorIndex +
                 1}{/if}:</span
           >
           {@html katex.renderToString(
@@ -701,7 +701,7 @@
             class="!p-2"
             on:click={() => {
               if (currentVectorIndex == 0) {
-                viewVector(savedRoutes[currentRoute]?.vectors.length + 1);
+                viewVector(savedRoutes[currentRoute]?.vectors?.length + 1);
               } else {
                 viewVector(currentVectorIndex - 1);
               }
@@ -726,7 +726,7 @@
             on:click={() => {
               if (
                 currentVectorIndex ==
-                savedRoutes[currentRoute]?.vectors.length + 1
+                savedRoutes[currentRoute]?.vectors?.length + 1
               ) {
                 viewVector(0);
               } else {
@@ -757,7 +757,8 @@
               }
               for (
                 let i = 0;
-                i < savedRoutes[currentRoute]?.vectors.length + 1 && playVector;
+                i < savedRoutes[currentRoute]?.vectors?.length + 1 &&
+                playVector;
                 i++
               ) {
                 cycles.push(
@@ -767,7 +768,7 @@
                     }
                     if (
                       currentVectorIndex ==
-                      savedRoutes[currentRoute]?.vectors.length + 1
+                      savedRoutes[currentRoute]?.vectors?.length + 1
                     ) {
                       viewVector(0);
                     } else {
