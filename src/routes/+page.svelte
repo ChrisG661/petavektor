@@ -456,7 +456,7 @@
         <Button
           id="kustom"
           on:click={() => {
-            startPoint = "1.437757, 124.790186";
+            startPoint = "1.437897, 124.790221";
             destinationPoint = "";
             savedRoutes.kustom.enabled = true;
             loadRoute("kustom");
