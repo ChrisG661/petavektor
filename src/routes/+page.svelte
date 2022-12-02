@@ -509,6 +509,27 @@
           bind:value={destinationPoint}
         />
       </div>
+      <div>
+        <label for="tolerance" class="mb-2 text-sm font-semibold"
+          >Sederhanakan
+        </label>
+        <div class="flex items-center flex-row gap-x-2 gap-y-2">
+          <Range
+            bind:value={tolerance}
+            min="0"
+            max="0.0002"
+            step="0.000001"
+            id="tolerance"
+            on:click={() => {
+              loadRoute(currentRoute);
+            }}
+          />
+          <span class="text-right text-sm w-8 flex-shrink-0"
+            >{((tolerance + Number.EPSILON) * 100000).toFixed(1)}</span
+          >
+        </div>
+      </div>
+
       <div class="gap-y-2">
         <div class="flex flex-row items-center h-9">
           <span class="mr-2"
